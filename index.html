@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Your Project Name</title>
-<meta property="og:title" content=Your Project Name" />
-<meta name="twitter:title" content="Your Project Name" />
-<meta name="description" content="Your project about your cool topic described right here." />
-<meta property="og:description" content="Your project about your cool topic described right here." />
-<meta name="twitter:description" content="Your project about your cool topic described right here." />
+<title>Visualizing Conditioning Signal Influence in ControlNet: A Hybrid Approach</title>
+<meta property="og:title" content="Visualizing Conditioning Signal Influence in ControlNet: A Hybrid Approach" />
+<meta name="twitter:title" content="Visualizing Conditioning Signal Influence in ControlNet: A Hybrid Approach" />
+<meta name="description" content="A research study on how conditioning signals influence the denoising process in ControlNet and a proposed hybrid approach for optimized image generation." />
+<meta property="og:description" content="A research study on how conditioning signals influence the denoising process in ControlNet and a proposed hybrid approach for optimized image generation." />
+<meta name="twitter:description" content="A research study on how conditioning signals influence the denoising process in ControlNet and a proposed hybrid approach for optimized image generation." />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" /> 
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,13 +16,33 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
 <link href="style.css" rel="stylesheet">
-
+<style>
+  .figure-caption {
+    text-align: center;
+    color: #000080;
+    font-size: 0.8em;
+    margin-top: 6px;
+  }
+  .img-fluid {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
+  .text-center {
+    text-align: center;
+  }
+  .equation {
+    max-width: 400px;
+    margin: 20px auto;
+  }
+</style>
 </head>
 <body class="nd-docs">
 <div class="nd-pageheader">
  <div class="container">
  <h1 class="lead">
- <nobr class="widenobr">Your Project Name</nobr>
+ <nobr class="widenobr">Visualizing Conditioning Signal Influence in ControlNet</nobr>
  <nobr class="widenobr">For CS 7150</nobr>
  </h1>
  </div>
@@ -31,34 +51,118 @@
 <div class="container">
 <div class="row">
 <div class="col justify-content-center text-center">
-<h2>An Analysis of [papername]</h2>
-<p>Describe the paper and the big question about it that interests you.</p>
+<h1>Visualizing Conditioning Signal Influence in ControlNet: A Hybrid Approach</h1>
+<p class="lead">
+  <a href="mailto:zheng.junx@northeastern.edu">Junxin Zheng</a>¹, <a href="mailto:wang.zhen3@northeastern.edu">Zhen Wang</a>¹
+  <br>
+  <small>¹<a href="https://khoury.northeastern.edu/">Northeastern University</a></small>
+</p>
 </div>
 </div>
-<div class="row">
+
+<div class="row mt-5">
 <div class="col">
 
-<h2>Literature Review; Biography; Social Impact; Industry Applications; Follow-on Research; and Peer-Review</h2>
+<h2>Introduction</h2>
+<p>Recent advances in text-to-image diffusion models have enabled users to exercise fine-grained control over the generation process—not only through textual prompts, but also via spatial conditioning signals such as edges, poses, and segmentation maps. Among these techniques, ControlNet <a href="#ref1">[1]</a> stands out as a powerful framework that integrates conditioning inputs directly into the architecture, applying them consistently throughout the entire generation process.</p>
 
-<p>Just as we have done in the role-playing exercise, analyze the paper from all perspectives.
-</p>
+<p>While highly effective, its fixed conditioning strategy may impose unnecessary constraints in later denoising steps — potentially limiting creative diversity and increasing computational overhead. This observation motivates a key question:</p>
 
-<p>Optionally, in addition to a reading-based analysis, implement the ideas of the paper in code, and report on your findings.
-</p>
+<blockquote class="blockquote">
+  <p><strong>How does conditioning signal affect the denoising process across timesteps?</strong></p>
+</blockquote>
 
-<h3>References</h3>
+<p>Our research begins by examining the temporal dynamics of conditioning signals within ControlNet. We employ both visual and mathematical tools to understand their role during generation, with a particular focus on DT-Visualization, introduced by Gandikota and Bau <a href="#ref2">[2]</a> that reveals the model's internal predictions of the final image at any intermediate timestep. Through this lens, we uncover that most structural conditioning influence occurs in the early denoising steps.</p>
 
-<p><a name="bottou-1990">[1]</a> <a href="https://papers.baulab.info/Bottou-1990.pdf"
-  >L&eacute;on Bottou and Patrick Gallinari.
-  <em>A framework for the cooperation of learning algorithms.</em></a>
-  Advances in neural information processing systems 3 (1990).
-</p>
+<p>Based on this insight, we propose a novel approach--Hybrid-Control-Net, which dynamically transitions between model architectures during generation—using ControlNet for initial structural guidance in the early steps before switching to standard Stable Diffusion for creative refinement and efficiency.</p>
+
+<p>To facilitate further exploration of these concepts, we've developed an open-source implementation available on our <a href="https://github.com/CS7150-Zheng-Wang/hybrid-control-net">GitHub repository</a>. Our codebase enables researchers and practitioners to experiment with different conditioning signals, transition points, and model combinations, providing a foundation for continued innovation in controlled image generation.</p>
+
+<h2>Related Work</h2>
+<p>This project builds upon two primary foundations in the field of image generation with diffusion models.</p>
+
+<p>First, we leverage the <strong>ControlNet</strong> architecture proposed by Zhang et al. <a href="#ref1">[1]</a> which introduces a trainable copy of the UNet encoder blocks that allows conditioning signals (such as edges, poses, or segmentation maps) to guide the image generation process. ControlNet has demonstrated remarkable ability to maintain fidelity to input conditions while preserving the high-quality generation capabilities of pretrained diffusion models. An overview of ControlNet architecture is shown below.</p>
+
+<figure class="figure text-center">
+  <img src="./img/controlnet_architecture.png" alt="ControlNet Architecture" class="img-fluid" style="max-width: 300px;">
+  <figcaption class="figure-caption">
+    <strong>Figure 0:</strong> The overall architecture of ControlNet, as proposed by Zhang et al. [1]. A parallel branch of UNet encoder blocks is added to process conditioning inputs, merged at each resolution level to enable spatial guidance.
+  </figcaption>
+</figure>
+
+<p>Our work is also heavily inspired by the recent advances in distillation techniques for diffusion models presented by Gandikota and Bau <a href="#ref2">[2]</a>. Their work introduces the concept of Diffusion Target (DT) visualization, which provides insights into what the model predicts as the final output at each intermediate denoising step. This visualization technique has proven invaluable for understanding how different models construct their outputs over time and has directly influenced our development of the hybrid-net approach described in this blog.</p>
+
+<p>Our contribution builds on these foundations by analyzing how conditioning signals influence the denoising trajectory and proposing a novel switching mechanism between ControlNet and uncontrolled Stable Diffusion to optimize both conditioning fidelity and generation diversity/efficiency.</p>
+
+<h2>Diffusion Target Visualization: Making Model Predictions Visible</h2>
+<p>Inspired by the groundbreaking work of Gandikota and Bau <a href="#ref2">[2]</a>, our approach leverages Diffusion Target Visualization (DT-Visualization) - a powerful technique that reveals the model's internal predictions at intermediate steps. DT-Visualization acts as a "time machine" into the generation process, allowing us to see what the model predicts as the final output long before the denoising process completes. For our implementation, we specifically utilized the EulerDiscreteScheduler <a href="#ref3">[3]</a> to effectively extract and visualize these intermediate predictions.</p>
+
+<figure class="figure text-center">
+  <img src="./img/dt_equation.png" alt="Diffusion Target Visualization equation" class="img-fluid equation">
+  <figcaption class="figure-caption">
+    <strong>Figure 1:</strong> The equation for Diffusion Target Visualization (DT-Visualization). It rearranges the diffusion equations to extract the model's prediction of the clean image (x̃₀,ₜ) at any timestep (t). This allows us to visualize how ControlNet interprets conditioning signals throughout the denoising trajectory.
+  </figcaption>
+</figure>
+
+<p>As shown in the equation above, DT-Visualization mathematically extracts the model's prediction of the clean image (x̃₀,ₜ) at any timestep (t) by rearranging the diffusion equations. This technique provides unique insights into how ControlNet interprets conditioning signals throughout the denoising trajectory, revealing that most of the structural conditioning information is captured in early timesteps - a key insight that enabled our hybrid approach. By visualizing these predictions at different stages, we can better understand how conditioning signals guide the generation process and identify the optimal point to transition between controlled and uncontrolled diffusion models.</p>
+
+<h2>Visual Analysis of Denoising Processes</h2>
+
+<figure class="figure text-center">
+  <img src="./img/visualization_grid.png" alt="Comparison grid showing Standard Denoising vs DT Visualization at different completion percentages for various conditioning types" class="img-fluid" style="max-width: 100%;">
+  <figcaption class="figure-caption">
+    <strong>Figure 2:</strong> Comparison between standard denoising process (left) and Diffusion Target visualization (right) at different timesteps (0%, 30%, 60%, 100%) for three conditioning types: Canny edge, Open Pose, and Segmentation maps. DT-Visualization lets us see what the model predicts as the final output at each intermediate step. This helps us understand how ControlNets build their images over time.
+  </figcaption>
+</figure>
+
+<p>Figure 2 provides fascinating insights into how conditioning signals influence the generation process. The left side shows traditional denoising process, where the image gradually emerges from random noise. The right side displays DT-Visualization results, showing how the model "sees" the target image at different timesteps. Notably, DT-Visualization produces recognizable images much earlier in the process. For example, with canny edge detection (top row), we can see a clear image of "Girl with a Pearl Earring" at just 30% completion in the DT visualization, while the standard denoising still shows mostly noise. This suggests that the conditioning signal provides strong guidance early in the process.</p>
+
+<h2>Hybrid-Control-Net Framework</h2>
+<p>The DT-Visualization experiment showed that conditioning information is predominantly captured in early timesteps, leading us to hypothesize that we could potentially boost both efficiency and output diversity by switching to stable diffusion at intermediate stages. Inspired by Gandikota and Bau's insights into diffusion model distillation <a href="#ref2">[2]</a>, we developed a novel hybrid approach that strategically transitions between models during the generation process.</p>
+
+<figure class="figure text-center">
+  <img src="./img/flow_diagram.png" alt="Hybrid-Control-Net architecture" class="img-fluid" style="max-width: 800px;">
+  <figcaption class="figure-caption">
+    <strong>Figure 3:</strong> The hybrid-control-net architecture. It starts with a conditioning signal (like canny edge detection) and text prompt fed into ControlNet, which processes these inputs until a predetermined intermediate step. At this point, we switch to a standard Stable Diffusion model to complete the generation.
+  </figcaption>
+</figure>
+
+<p>As illustrated in Figure 3, our hybrid architecture begins with a conditioning signal (such as canny edge map) and text prompt fed into ControlNet, which processes these inputs until a predetermined intermediate step. At this critical juncture, instead of continuing with ControlNet for the entire denoising trajectory, we switch to a standard Stable Diffusion model to complete the generation. This transition allows us to leverage ControlNet's strong conditioning capabilities in early steps while benefiting from the broader creative capabilities of uncontrolled diffusion models in the refinement phase.</p>
+
+<h2>Impact of Prompts on Generation Quality</h2>
+
+<figure class="figure text-center">
+  <img src="./img/prompt_comparison.png" alt="Prompt dependency analysis" class="img-fluid" style="max-width: 800px;">
+  <figcaption class="figure-caption">
+    <strong>Figure 4:</strong> Prompt dependency analysis across different conditioning methods. The left side shows generations with text prompts alongside conditioning signals, while the right shows generations with only conditioning signals. The top row uses canny edge detection, the middle row uses segmentation maps, and the bottom row uses pose information.
+  </figcaption>
+</figure>
+
+<p>Our experiments revealed a significant difference between ControlNet and regular Stable Diffusion models when it comes to prompt dependency. Figure 4 demonstrates how text prompts influence generation quality across different conditioning methods. A key finding was that ControlNet is specifically trained to optimize no-prompt generation with conditioning signals alone, while standard Stable Diffusion is not designed with this capability.</p>
+
+<p>The left side shows generations with text prompts alongside conditioning signals, while the right shows generations with only conditioning signals. With canny edge detection (top row), prompt-guided generations maintain remarkable consistency throughout all stages. When using ControlNet without prompts, the model still produces coherent variations that respect the conditioning signal. However, in the segmentation (middle row) and pose (bottom row) examples, the absence of prompts leads to more unpredictable outputs with standard Stable Diffusion, whereas ControlNet maintains better semantic coherence even without textual guidance. This difference in optimization targets further supports our hybrid approach, as it allows us to leverage the complementary strengths of both architectures.</p>
+
+<h2>Conclusion: Reimagining ControlNet Through a Hybrid Lens</h2>
+<p>Our exploration of ControlNet's internal dynamics through DT-Visualization has led us to fundamentally reconsider how we approach controlled image generation. We're particularly excited about the potential of our hybrid approach, which represents more than just an efficiency optimization—it suggests a new paradigm for how we might leverage specialized and general models in complementary ways.</p>
+
+<p>What fascinates us most is how this hybrid architecture seems to combine the best of both worlds: ControlNet's precision in early timesteps and Stable Diffusion's creative refinement in later stages. We've observed that conditioning signals provide their most critical guidance early in the process, raising an interesting question: are we over-conditioning our models by applying specialized architectures throughout the entire generation process? Our experiments suggest that the answer might be yes.</p>
+
+<p>Looking ahead, we're curious whether we could develop automated methods to determine the optimal switching point dynamically, perhaps by analyzing the rate of change in DT-visualizations to detect when conditioning influence plateaus.</p>
+
+<p>Additionally, we wonder if this approach might help address some of the diversity concerns noted in Gandikota and Bau's work <a href="#ref2">[2]</a>. By releasing the generation process from specialized control in later stages, we might recover some of the creative variability that can be lost in highly-conditioned models.</p>
+
+<p>As we continue to develop this approach, we're eager to explore how it performs across different types of conditioning beyond the visual signals explored here. Could this hybrid architecture prove even more valuable for more abstract conditioning types? The journey of discovery continues, and we look forward to seeing how others might build upon these insights.</p>
+
+<h2>References</h2>
+<p><a name="ref1">[1]</a> Zhang, L., Rao, A., & Agrawala, M. (2023). Adding Conditional Control to Text-to-Image Diffusion Models. <em>arXiv preprint arXiv:2302.05543</em>. <a href="https://doi.org/10.48550/arXiv.2302.05543">https://doi.org/10.48550/arXiv.2302.05543</a></p>
+
+<p><a name="ref2">[2]</a> Gandikota, R., & Bau, D. (2025). Distilling Diversity and Control in Diffusion Models. <em>arXiv preprint arXiv:2503.10637</em>. <a href="https://distillation.baulab.info/">https://distillation.baulab.info/</a></p>
+
+<p><a name="ref3">[3]</a> Hugging Face. (2023). EulerDiscreteScheduler. Hugging Face Diffusers Documentation. <a href="https://huggingface.co/docs/diffusers/api/schedulers/euler">https://huggingface.co/docs/diffusers/api/schedulers/euler</a></p>
 
 <h2>Team Members</h2>
-                                                   
-<p>Make sure to list here is who is on the team.</p>
+<p>Junxin Zheng and Zhen Wang from Northeastern University</p>
 
-  
 </div><!--col-->
 </div><!--row -->
 </div> <!-- container -->
